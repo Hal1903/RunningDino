@@ -1,4 +1,3 @@
-
 import pygame
 import random
 pygame.init()
@@ -55,7 +54,7 @@ class dino(object):
         self.height=height
         self.isUp=False
         self.isDown=False
-        self.incrementMax=160
+        self.incrementMax=180
         self.increment=20
         self.walk=0
         self.jumpup=1
@@ -65,8 +64,8 @@ class dino(object):
         if playerdino.walk >= len(running) - 1:
             playerdino.walk = 0
         image = running[playerdino.walk]
-        DisplayLabel = font.render('Passed Blocks: ', 30, white)
-        DisplayValue = font.render(str(totalBlock), 30, white)
+        DisplayLabel = font.render('Passed Blocks: ', 30, black)
+        DisplayValue = font.render(str(totalBlock), 30, black)
         clock.tick(fps)
         if playerdino.isUp:
             clock.tick(fps)
@@ -77,7 +76,6 @@ class dino(object):
                 playerdino.y += playerdino.increment
                 flooring()
                 drawcrators(playerdino.increment)
-
                 win.blit(jmage, (playerdino.x, playerdino.y))
                 playerdino.jumpdown += 1
                 if playerdino.jumpdown>=len(jumpingdown)-1:
@@ -137,14 +135,15 @@ def drawcrators(speed):
         merged.blit(obstacle[0], (crator1loc, defaultBlockX-a))
         a += 55
     totalBlock=passedBlock1+passedBlock2
-    
+
     pygame.draw.line(merged, black, (0, floorSurface-55), (width, floorSurface-55), 1)
     pygame.draw.line(merged, red, (0, playerdino.y + 70), (width, playerdino.y + 70), 1)
     pygame.draw.line(merged, white, (0, playerdino.y), (width, playerdino.y), 1)
 
     win.blit(merged,(0,0))
-    if ((playerdino.x+55 > crator1loc) and (playerdino.x>crator1loc+40)):
-        if playerdino.y+70<floorSurface-55:
+
+    if ((playerdino.x > crator1loc-obstaclesize) and (playerdino.x<crator1loc+obstaclesize)):
+        if playerdino.y+70<floorSurface-obstaclesize*quantityList[totalBlock]:
             print('over the block')
         else:
             pygame.quit()
@@ -168,12 +167,13 @@ while run:
         dino.updatedino(playerdino, 0, win)
     if keys[pygame.K_RIGHT]:
         dino.updatedino(playerdino, 6, win)
+        playerdino.updatedino(6, win)
     elif keys[pygame.K_LEFT]:
-        dino.updatedino(playerdino, -6, win)
+        #dino.updatedino(playerdino, -6, win)
+        playerdino.updatedino(-6,win)
     else:
         dino.updatedino(playerdino, 0, win)
     dino.updatedino(playerdino, 0, win)
     pygame.display.update()
 
 pygame.quit()
-
