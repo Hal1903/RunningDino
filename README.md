@@ -7,3 +7,6 @@
 #Some videos helped me stucked:
 #TechWithTim
   #Thank you very much!
+  
+  
+#Up arrow key to jump
