@@ -52,7 +52,7 @@ class dino(object):
         self.y=y
         self.isUp=False
         self.isDown=False
-        self.incrementMax=200
+        self.incrementMax=175
         self.increment=25
         self.walk=0
         self.jumpup=1
@@ -68,8 +68,7 @@ class dino(object):
         if self.walk >= len(self.running) - 1:
             self.walk = 0
         image = self.running[self.walk]
-
-        clock.tick(fps)
+        clock.tick(fps+speed)
         if self.isUp:
             if self.isDown:
                 jmage = self.jumpingdown[self.jumpdown]
@@ -165,6 +164,18 @@ def scoreDoc():
     f.close()
     return bestScore
 
+def LastScore():
+    f=open('Lscore.txt','r')
+    file=f.readlines()
+    last=int(file[0])
+    f.close()
+    return last
+def LastUpdate():
+    file=open('Lscore.txt','w')
+    file.write(str(totalBlock))
+    file.close()
+    f.close()
+
 def endWindow():
     global totalBlock
     endrun=True
@@ -176,16 +187,21 @@ def endWindow():
         win.blit(bg2,(0,0))
         DisplayScore=font.render('Your Score:'+str(totalBlock),45,black)
         scoreBest=font.render('Your Best Score:'+str(scoreDoc()),25,black)
+        scoreLast=font.render('Your Last Score:'+str(LastScore()),25,black)
         win.blit(DisplayScore,(200,200))
         win.blit(scoreBest, (200, 300))
+        win.blit(scoreLast,(200,400))
         pygame.display.update()
+    if not endrun:
+        LastUpdate()
 
 o=0
+spd=0
 def window():
     global totalBlock,run
     win.blit(bg, (bgX, 0))
     win.blit(bg, (bgLastX, 0))
-    playerdino.updatedino(0, win)
+    playerdino.updatedino(spd, win)
     for obstacle in obstacleList:
         cratorClass.drawCrator(obstacle,win)
         obstacle.x-=fps
@@ -224,10 +240,10 @@ while run:
     if keys[pygame.K_UP]:
         playerdino.isUp=True
         # playerdino.updatedino(0, win)
-    elif keys[pygame.K_RIGHT]:
-        fps=25
+    if keys[pygame.K_RIGHT]:
+        spd=15
     else:
-        pass
+        spd=0
         # playerdino.updatedino(0, win)
     window()
     if bgX<=-800:
