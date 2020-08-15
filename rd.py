@@ -1,26 +1,27 @@
 import pygame
 from pygame.locals import *
 import random
+
 pygame.init()
 width=800
 height=600
 win=pygame.display.set_mode((width,height))
 pygame.display.set_caption('Running Dino')
 clock=pygame.time.Clock()
-pygame.time.set_timer(USEREVENT+2,4000)
-fps=25
+pygame.time.set_timer(USEREVENT+2,random.randint(2000,2500))
+fps=20
 floor=[pygame.image.load('2.png')]
 bg=pygame.image.load('BG.png')
 bg=pygame.transform.scale(bg,(width,height))
 font=pygame.font.SysFont(None,50)
-white=(255,255,255)
-black=(0,0,0)
-red=(255,0,0)
+white=(255,255,255,1)
+black=(0,0,0,1)
+red=(255,0,0,1)
 
 foot=520
 fy=450
 defaultBlockX=fy+15
-win.fill((255, 255, 255))
+win.fill(white)
 run=True
 isRun=False
 
@@ -33,7 +34,8 @@ floorSurface=fy+70
 
 bgX=0
 bgLastX=bg.get_width()
-
+bg2=bg.copy()
+numEvent=0
 
 class dino(object):
     running = [pygame.image.load('Run (1).png'), pygame.image.load('Run (2).png'), pygame.image.load('Run (3).png'),
@@ -50,8 +52,8 @@ class dino(object):
         self.y=y
         self.isUp=False
         self.isDown=False
-        self.incrementMax=210
-        self.increment=30
+        self.incrementMax=200
+        self.increment=25
         self.walk=0
         self.jumpup=1
         self.jumpdown=0
@@ -62,12 +64,11 @@ class dino(object):
             self.running[n] = pygame.transform.scale(self.running[n], (80, 80))
     def updatedino(self,speed,win):
         global bgX,playerdino,image,jmage,jdmage
-        self.hitbox = (self.x, self.y+5, 60, 60)
+        self.hitbox = (self.x, self.y, 60, 60)
         if self.walk >= len(self.running) - 1:
             self.walk = 0
         image = self.running[self.walk]
-        # DisplayLabel = font.render('Passed Blocks: ', 30, black)
-        # DisplayValue = font.render(str(totalBlock), 30, black)
+
         clock.tick(fps)
         if self.isUp:
             if self.isDown:
@@ -96,15 +97,12 @@ class dino(object):
             clock.tick(fps+speed)
             win.blit(image, (self.x, self.y))
             self.walk += 1
-        pygame.draw.rect(win,red,self.hitbox,2)
-        # win.blit(DisplayLabel,(0,0))
-        # win.blit(DisplayValue,(280,0))
-
+        #pygame.draw.rect(win,red,self.hitbox,2)
 
 def flooring():
     global bg
     bg = bg.copy()
-    for i in range(-1, 7):
+    for i in range(-1,7):
         bg.blit(floor[0], (playerdino.x + i * 100, floorSurface))
 
 obstacleList=[]
@@ -113,54 +111,101 @@ obstacleList=[]
 # obstacleList.append(crator1loc)
 
 class cratorClass(object):
+    global floorSurface, numEvent
     obstacle = [pygame.image.load('Crate.png')]
     obstaclesize = 55
-    def __init__(self,x,y,quantity):
+    def __init__(self,x,y,quant):
         self.x=x
         self.y=y
-        self.quantity=quantity
+        self.quant=quant
         self.obstacle[0] = pygame.transform.scale(self.obstacle[0], (self.obstaclesize, self.obstaclesize))
     def drawCrator(self,win):
+        #edit it to regard quantity by multiply y
         self.hitbox=(self.x,self.y,self.obstaclesize,self.obstaclesize)
-        pygame.draw.rect(win,red,self.hitbox,1)
         win.blit(self.obstacle[0],(self.x,self.y))
+        #pygame.draw.rect(win, red, self.hitbox, 2)
+        if self.quant==2:
+            win.blit(self.obstacle[0],(self.x,self.y-55))
+            pygame.draw.rect(win, red, (self.x,self.y-55,self.obstaclesize,self.obstaclesize), 2)
     def collide(self,rect):
-        if rect[0] + rect[2] > self.hitbox[0] and rect[0] < self.hitbox[0] + self.hitbox[2]:
-            if rect[1] < self.hitbox[3]:
-                return True
-        return False
+        if self.quant==2:
+            if ((rect[0]+40>self.hitbox[0]) and (rect[0]<self.hitbox[0]+self.obstaclesize)):
+                if rect[1]+60<floorSurface-self.obstaclesize*2-20:
+                    return False
+                else:
+                    return True
+            else:
+                return False
+        if self.quant==1:
+            if ((rect[0]+40>self.hitbox[0]) and (rect[0]<self.hitbox[0]+self.obstaclesize)):
+                if rect[1]+60<floorSurface-self.obstaclesize-15:
+                    return False
+                else:
+                    return True
+            else:
+                return False
+
+def countBlock():
+    global obstacleList,totalBlock
+    DisplayLabel = font.render('Passed Blocks: ', 30, black)
+    DisplayValue = font.render(str(totalBlock), 30, black)
+    win.blit(DisplayLabel, (0, 0))
+    win.blit(DisplayValue, (280, 0))
+
+def scoreDoc():
+    f=open('score.txt','r')
+    file=f.readlines()
+    bestScore=int(file[0])
+    if totalBlock>int(bestScore):
+        f.close()
+        file=open('score.txt','w')
+        file.write(str(totalBlock))
+        file.close()
+        #return totalBlock
+    f.close()
+    return bestScore
+
+def endWindow():
+    global totalBlock
+    endrun=True
+    pygame.time.delay(500)
+    while endrun:
+        for event in pygame.event.get():
+            if event.type==pygame.QUIT:
+                endrun=False
+        win.blit(bg2,(0,0))
+        DisplayScore=font.render('Your Score:'+str(totalBlock),45,black)
+        scoreBest=font.render('Your Best Score:'+str(scoreDoc()),25,black)
+        win.blit(DisplayScore,(200,200))
+        win.blit(scoreBest, (200, 300))
+        pygame.display.update()
+
 o=0
 def window():
+    global totalBlock,run
     win.blit(bg, (bgX, 0))
     win.blit(bg, (bgLastX, 0))
     playerdino.updatedino(0, win)
     for obstacle in obstacleList:
         cratorClass.drawCrator(obstacle,win)
         obstacle.x-=fps
-
+        if obstacle.x <= -55:
+            totalBlock += 1
+            obstacleList.pop(obstacleList.index(obstacle))
+        if obstacle.collide(playerdino.hitbox)==True:
+            run=False
+            endWindow()
+    countBlock()
     pygame.display.update()
-
-    # if (((playerdino.x > crator1loc-obstaclesize) and (playerdino.x<crator1loc+obstaclesize))):
-    #     if playerdino.y + 70 < floorSurface - obstaclesize * quantityList[passedBlock1]:
-    #         pass
-    #     else:
-    #         pygame.quit()
-    # else:
-    #     pass
-    # if ((playerdino.x > crator2loc-obstaclesize) and (playerdino.x<crator2loc+obstaclesize)):
-    #     if playerdino.y + 70 < floorSurface - obstaclesize * quantityList2[passedBlock2]:
-    #         pass
-    #     else:
-    #         pygame.quit()
-    # else:
-    #     pass
 
 playerdino=dino(100,450)
 #image=dino.running[playerdino.walk]
 flooring()
+
 while run:
     #win.blit(bg, (0, 0))
-    clock.tick(fps/2)
+    fps=20
+    clock.tick(fps)
     bgX-=fps
     bgLastX-=fps
     keys = pygame.key.get_pressed()
@@ -171,13 +216,16 @@ while run:
         if event.type==pygame.QUIT:
             run=False
         if event.type==USEREVENT+2:
-            r=random.randint(0,2)
-            obstacleList.append(cratorClass(810,defaultBlockX,r))
-            quantity = random.randint(0, 2)
+            numEvent+=1
+            quantity = random.randint(1,2)
             quantityList.append(quantity)
+            obstacleList.append(cratorClass(840,defaultBlockX,quantityList[numEvent-1]))
+            print(quantityList)
     if keys[pygame.K_UP]:
         playerdino.isUp=True
         # playerdino.updatedino(0, win)
+    elif keys[pygame.K_RIGHT]:
+        fps=25
     else:
         pass
         # playerdino.updatedino(0, win)
@@ -189,4 +237,3 @@ while run:
     pygame.display.update()
 
 pygame.quit()
-
