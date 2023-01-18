@@ -1,7 +1,8 @@
-# RunningDino
-# First hands-on project
-# Where to download the images
-# https://www.gameart2d.com/uploads/3/0/9/1/30917885/freetileset.zip
-# A video from TechWithTim helped me to debug.
+##RunningDino
+First hands-on project
+Where to download the images
+https://www.gameart2d.com/uploads/3/0/9/1/30917885/freetileset.zip
+A video from TechWithTim helped me to debug.
 
-# Up arrow key to jump
+###Keys
+Up arrow key to jump
